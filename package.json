@@ -3,9 +3,18 @@
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "lint:fix": "biome check --write"
   },
   "dependencies": {
-    "electron": "^latest"
+    "@picocss/pico": "^2.1.1",
+    "electron": "latest",
+    "stimulus": "^3.2.2"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.1",
+    "@commitlint/cli": "^21.1.0",
+    "@commitlint/config-conventional": "^21.1.0",
+    "lefthook": "^2.1.9"
   }
 }
