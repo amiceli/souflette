@@ -1,0 +1,145 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Tri images</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: sans-serif;
+            background: #fff;
+            color: #000;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            display: flex;
+            width: 95vw;
+            height: 80vh;
+            gap: 30px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .left {
+            flex: 3;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .left img {
+            max-width: 100%;
+            max-height: 75vh;
+        }
+
+        .right {
+            flex: 2;
+            text-align: left;
+            word-break: break-all;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin: 0 0 10px 0;
+        }
+
+        h2 {
+            font-size: 24px;
+            font-weight: normal;
+            margin: 0;
+        }
+
+        .buttons {
+            margin-top: 25px;
+        }
+
+        button {
+            font-size: 22px;
+            padding: 10px 20px;
+            margin: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <button onclick="pick()">Choisir dossier</button>
+
+    <div class="container">
+        <div class="left">
+            <img id="img">
+        </div>
+
+        <div class="right">
+            <h1 id="name"></h1>
+            <h2 id="path"></h2>
+
+            <div class="buttons">
+                <button onclick="copyName()">Copier nom</button>
+                <button onclick="copyPath()">Copier chemin</button>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <button onclick="keep()">Garder</button>
+        <button onclick="del()">Virer</button>
+    </div>
+
+    <script>
+        const { ipcRenderer, clipboard } = require("electron");
+
+        let current = null;
+
+        async function pick() {
+            const ok = await ipcRenderer.invoke("choose-folder");
+            if (ok) load();
+        }
+
+        async function load() {
+            current = await ipcRenderer.invoke("get-current");
+
+            if (!current) {
+                alert("Terminé ou dossier vide");
+                return;
+            }
+
+            document.getElementById("img").src = "file://" + current;
+
+            const parts = current.split(/[/\\]/);
+            const name = parts[parts.length - 1];
+
+            document.getElementById("name").innerText = name;
+            document.getElementById("path").innerText = current;
+        }
+
+        function keep() {
+            ipcRenderer.send("next");
+            load();
+        }
+
+        function del() {
+            ipcRenderer.send("delete-file", current);
+            ipcRenderer.send("next");
+            load();
+        }
+
+        function copyName() {
+            clipboard.writeText(document.getElementById("name").innerText);
+        }
+
+        function copyPath() {
+            clipboard.writeText(document.getElementById("path").innerText);
+        }
+    </script>
+
+</body>
+
+</html>
