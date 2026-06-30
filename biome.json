@@ -6,14 +6,7 @@
         "useIgnoreFile": false
     },
     "files": {
-        "ignoreUnknown": false,
-        "includes": ["*.js", "*.html"]
-    },
-    "formatter": {
-        "enabled": true,
-        "indentStyle": "space",
-        "indentWidth": 4,
-        "lineWidth": 140
+        "ignoreUnknown": false
     },
     "linter": {
         "enabled": true,
@@ -24,12 +17,15 @@
             }
         }
     },
+    "formatter": {
+        "indentStyle": "space",
+        "indentWidth": 4,
+        "expand": "always"
+    },
     "javascript": {
         "formatter": {
             "semicolons": "asNeeded",
-            "quoteStyle": "single",
-            "trailingCommas": "all",
-            "expand": "always"
+            "quoteStyle": "single"
         }
     }
 }
