@@ -7,6 +7,7 @@ const dict = {
         next: 'Suivant →',
         copyName: 'Copier nom',
         copyPath: 'Copier chemin',
+        reset: '⟲ Réinitialiser',
         keptImages: 'Images gardées',
         done: 'Terminé !',
         doneDesc: 'Toutes les images ont été triées.',
@@ -23,6 +24,7 @@ const dict = {
         next: 'Next →',
         copyName: 'Copy name',
         copyPath: 'Copy path',
+        reset: '⟲ Reset',
         keptImages: 'Kept images',
         done: 'Done!',
         doneDesc: 'All images have been sorted.',
@@ -41,12 +43,8 @@ function detectLanguage() {
 
 const locale = detectLanguage()
 
-function t(key) {
+export function t(key) {
     return dict[locale][key] || key
 }
 
-module.exports = {
-    dict,
-    locale,
-    t,
-}
+export { locale }

@@ -98,42 +98,52 @@
 		</style>
 	</head>
 	<body>
-		<nav>
-			<button id="pickButton" type="button"></button>
-		</nav>
+		<div data-controller="image-sorter">
+			<nav>
+				<button type="button" data-target="image-sorter.pickButton" data-action="click->image-sorter#pickFolder"></button>
+			</nav>
 
-		<div class="container" id="container" style="display: none;">
-			<div class="left">
-				<img id="currentImage" alt="">
-			</div>
-
-			<div class="right">
-				<h1 id="imageName">–</h1>
-				<p id="imagePath"></p>
-
-				<div class="button-group">
-					<button id="copyNameBtn" type="button"></button>
-					<button id="copyPathBtn" type="button"></button>
+			<div class="container" data-target="image-sorter.container" style="display: none;">
+				<div class="left">
+					<img data-target="image-sorter.currentImage" alt="">
 				</div>
 
-				<div id="keptList" style="flex: 1; overflow: auto; margin-bottom: 1rem;">
-					<h3 id="keptListTitle">–</h3>
-					<ul id="keptItems" style="font-size: 0.875rem;"></ul>
+				<div class="right">
+					<h1 data-target="image-sorter.imageName">–</h1>
+					<p data-target="image-sorter.imagePath"></p>
+
+					<div class="button-group">
+						<button type="button" data-target="image-sorter.copyNameBtn" data-action="click->image-sorter#copyName"></button>
+						<button type="button" data-target="image-sorter.copyPathBtn" data-action="click->image-sorter#copyPath"></button>
+						<button type="button" data-target="image-sorter.resetBtn" data-action="click->image-sorter#reset"></button>
+					</div>
+
+					<div id="keptList" style="flex: 1; overflow: auto; margin-bottom: 1rem;">
+						<h3 data-target="image-sorter.keptListTitle">–</h3>
+						<ul data-target="image-sorter.keptList" style="font-size: 0.875rem;"></ul>
+					</div>
 				</div>
+			</div>
+
+			<div class="controls" data-target="image-sorter.controls" style="display: none;">
+				<button type="button" data-target="image-sorter.prevBtn" data-action="click->image-sorter#navigatePrevious"></button>
+				<button type="button" data-target="image-sorter.keepBtn" aria-pressed="false" data-action="click->image-sorter#keep"></button>
+				<button type="button" data-target="image-sorter.deleteBtn" aria-pressed="false" data-action="click->image-sorter#delete"></button>
+				<button type="button" data-target="image-sorter.nextBtn" data-action="click->image-sorter#navigateNext"></button>
+			</div>
+
+			<div class="stats">
+				<span data-target="image-sorter.stats"></span>
 			</div>
 		</div>
 
-		<div class="controls" id="controls" style="display: none;">
-			<button id="prevBtn" type="button"></button>
-			<button id="keepBtn" type="button" aria-pressed="false"></button>
-			<button id="deleteBtn" type="button" aria-pressed="false"></button>
-			<button id="nextBtn" type="button"></button>
-		</div>
-
-		<div class="stats">
-			<span id="stats"></span>
-		</div>
-
-		<script src="./src/index.js"></script>
+		<script type="importmap">
+		{
+			"imports": {
+				"stimulus": "./node_modules/stimulus/dist/stimulus.js"
+			}
+		}
+		</script>
+		<script type="module" src="./src/index.js"></script>
 	</body>
 </html>
