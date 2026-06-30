@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('node:electron')
+const { app, BrowserWindow, ipcMain, dialog } = require('electron')
 const fs = require('node:fs')
 const path = require('node:path')
 
@@ -68,11 +68,12 @@ ipcMain.handle('choose-folder', async () => {
 
     const folderPath = res.filePaths[0]
     const files = getImages(folderPath)
+    const currentState = loadState()
 
     const state = {
         files,
-        index: 0,
-        kept: [],
+        index: currentState.folderPath === folderPath ? currentState.index : 0,
+        kept: currentState.folderPath === folderPath ? currentState.kept : [],
         folderPath,
     }
 
