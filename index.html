@@ -99,42 +99,41 @@
 	</head>
 	<body>
 		<nav>
-			<button id="pickButton" type="button">Choisir dossier</button>
+			<button id="pickButton" type="button"></button>
 		</nav>
 
-		<div class="container">
+		<div class="container" id="container" style="display: none;">
 			<div class="left">
 				<img id="currentImage" alt="">
 			</div>
 
 			<div class="right">
-				<h1 id="imageName">En attente...</h1>
+				<h1 id="imageName">–</h1>
 				<p id="imagePath"></p>
 
 				<div class="button-group">
-					<button id="copyNameBtn" type="button">Copier nom</button>
-					<button id="copyPathBtn" type="button">Copier chemin</button>
+					<button id="copyNameBtn" type="button"></button>
+					<button id="copyPathBtn" type="button"></button>
 				</div>
 
 				<div id="keptList" style="flex: 1; overflow: auto; margin-bottom: 1rem;">
-					<h3>Images gardées (<span id="keptCount">0</span>)</h3>
+					<h3 id="keptListTitle">–</h3>
 					<ul id="keptItems" style="font-size: 0.875rem;"></ul>
 				</div>
 			</div>
 		</div>
 
-		<div class="controls">
-			<button id="prevBtn" type="button">← Précédent</button>
-			<button id="keepBtn" type="button" aria-pressed="false">✓ Garder</button>
-			<button id="deleteBtn" type="button" aria-pressed="false">✕ Virer</button>
-			<button id="nextBtn" type="button">Suivant →</button>
+		<div class="controls" id="controls" style="display: none;">
+			<button id="prevBtn" type="button"></button>
+			<button id="keepBtn" type="button" aria-pressed="false"></button>
+			<button id="deleteBtn" type="button" aria-pressed="false"></button>
+			<button id="nextBtn" type="button"></button>
 		</div>
 
 		<div class="stats">
 			<span id="stats"></span>
 		</div>
 
-		<script src="./node_modules/stimulus/dist/stimulus.umd.js"></script>
-		<script type="module" src="./src/index.js"></script>
+		<script src="./src/index.js"></script>
 	</body>
 </html>
