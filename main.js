@@ -6,11 +6,23 @@ let win
 const stateFile = path.join(app.getPath('userData'), 'sorter-state.json')
 
 function getImages(dir) {
-    return fs
-        .readdirSync(dir)
-        .filter((f) => /\.(jpg|jpeg|png|webp|gif)$/i.test(f))
-        .map((f) => path.join(dir, f))
-        .sort()
+    const entries = fs.readdirSync(dir, {
+        withFileTypes: true,
+    })
+
+    const images = []
+
+    for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name)
+
+        if (entry.isDirectory()) {
+            images.push(...getImages(fullPath))
+        } else if (/\.(jpg|jpeg|png|webp|gif)$/i.test(entry.name)) {
+            images.push(fullPath)
+        }
+    }
+
+    return images.sort()
 }
 
 function loadState() {
