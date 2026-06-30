@@ -1,139 +1,111 @@
 <!doctype html>
-<html lang="fr">
+<html lang="fr" class="height-full">
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>Tri images</title>
-		<link rel="stylesheet" href="./node_modules/@picocss/pico/css/pico.min.css">
-		<style>
-			body {
-				height: 100vh;
-				display: flex;
-				flex-direction: column;
-				overflow: hidden;
-			}
-
-			nav {
-				padding: 1rem;
-				border-bottom: 1px solid var(--border-color);
-			}
-
-			.container {
-				flex: 1;
-				display: flex;
-				gap: 2rem;
-				align-items: stretch;
-				overflow: hidden;
-				padding: 1rem;
-			}
-
-			.left {
-				flex: 3;
-				display: flex;
-				justify-content: center;
-				align-items: center;
-				overflow: auto;
-			}
-
-			.left img {
-				max-width: 100%;
-				max-height: 100%;
-				object-fit: contain;
-			}
-
-			.right {
-				flex: 1;
-				display: flex;
-				flex-direction: column;
-				overflow: auto;
-			}
-
-			.right h1 {
-				font-size: 1.5rem;
-				margin: 0 0 0.5rem 0;
-				word-break: break-all;
-			}
-
-			.right p {
-				font-size: 0.875rem;
-				color: var(--muted-color);
-				margin: 0 0 1rem 0;
-				word-break: break-all;
-			}
-
-			.button-group {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 0.5rem;
-				margin-bottom: 1rem;
-			}
-
-			.button-group button {
-				flex: 1;
-				min-width: 100px;
-				padding: 0.5rem;
-				font-size: 0.875rem;
-			}
-
-			.controls {
-				padding: 1rem;
-				border-top: 1px solid var(--border-color);
-				display: flex;
-				gap: 1rem;
-				justify-content: center;
-				flex-wrap: wrap;
-			}
-
-			.controls button {
-				padding: 0.75rem 1.5rem;
-			}
-
-			.stats {
-				font-size: 0.875rem;
-				color: var(--muted-color);
-				text-align: center;
-				padding: 0.5rem;
-				border-top: 1px solid var(--border-color);
-			}
-		</style>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@primer/css@21.0.0/dist/primer.css">
 	</head>
-	<body>
-		<div data-controller="image-sorter">
-			<nav>
-				<button type="button" data-target="image-sorter.pickButton" data-action="click->image-sorter#pickFolder"></button>
-			</nav>
+	<body class="height-full">
+		<div class="height-full d-flex flex-column" data-controller="image-sorter">
+			<header class="Header d-flex flex-items-center p-3">
+				<button
+					type="button"
+					class="btn btn-primary mr-2"
+					data-target="image-sorter.pickButton"
+					data-action="click->image-sorter#pickFolder">
+				</button>
+				<div class="d-flex flex-items-center" data-target="image-sorter.navButtons" style="display: none;">
+					<button
+						type="button"
+						class="btn mr-2"
+						data-target="image-sorter.changeFolderBtn"
+						data-action="click->image-sorter#pickFolder">
+					</button>
+					<button
+						type="button"
+						class="btn btn-danger"
+						data-target="image-sorter.resetBtn"
+						data-action="click->image-sorter#reset">
+					</button>
+				</div>
+			</header>
 
-			<div class="container" data-target="image-sorter.container" style="display: none;">
-				<div class="left">
-					<img data-target="image-sorter.currentImage" alt="">
+			<div class="d-flex flex-1 overflow-hidden" data-target="image-sorter.container" style="display: none;">
+				<div class="d-flex flex-column flex-1 p-3 overflow-hidden">
+					<div class="d-flex flex-1 flex-justify-center flex-items-center overflow-hidden">
+						<img class="image-display" data-target="image-sorter.currentImage" alt="" />
+					</div>
+					<div class="d-flex flex-justify-center mt-3">
+						<div class="BtnGroup">
+							<button
+								type="button"
+								class="btn BtnGroup-item"
+								data-target="image-sorter.prevBtn"
+								data-action="click->image-sorter#navigatePrevious">
+							</button>
+							<button
+								type="button"
+								class="btn BtnGroup-item"
+								data-target="image-sorter.nextBtn"
+								data-action="click->image-sorter#navigateNext">
+							</button>
+						</div>
+					</div>
 				</div>
 
-				<div class="right">
-					<h1 data-target="image-sorter.imageName">–</h1>
-					<p data-target="image-sorter.imagePath"></p>
-
-					<div class="button-group">
-						<button type="button" data-target="image-sorter.copyNameBtn" data-action="click->image-sorter#copyName"></button>
-						<button type="button" data-target="image-sorter.copyPathBtn" data-action="click->image-sorter#copyPath"></button>
-						<button type="button" data-target="image-sorter.resetBtn" data-action="click->image-sorter#reset"></button>
+				<div class="d-flex flex-column p-3 overflow-y-auto" style="width: 300px;">
+					<div class="mb-3">
+						<h2 class="h3 mb-1" data-target="image-sorter.imageName">–</h2>
+						<p class="f6 color-fg-muted mb-0" data-target="image-sorter.imagePath"></p>
 					</div>
 
-					<div id="keptList" style="flex: 1; overflow: auto; margin-bottom: 1rem;">
-						<h3 data-target="image-sorter.keptListTitle">–</h3>
-						<ul data-target="image-sorter.keptList" style="font-size: 0.875rem;"></ul>
+					<div class="d-flex flex-column mb-3">
+						<button
+							type="button"
+							class="btn btn-primary mb-2"
+							data-target="image-sorter.copyImageBtn"
+							data-action="click->image-sorter#copyImage">
+						</button>
+						<button
+							type="button"
+							class="btn btn-primary mb-2"
+							data-target="image-sorter.copyNameBtn"
+							data-action="click->image-sorter#copyName">
+						</button>
+						<button
+							type="button"
+							class="btn btn-primary"
+							data-target="image-sorter.copyPathBtn"
+							data-action="click->image-sorter#copyPath">
+						</button>
 					</div>
+
+					<div class="d-flex mb-3">
+						<button
+							type="button"
+							class="btn btn-primary btn-large flex-1 mr-2"
+							data-target="image-sorter.keepBtn"
+							data-action="click->image-sorter#keep">
+						</button>
+						<button
+							type="button"
+							class="btn btn-danger btn-large flex-1"
+							data-target="image-sorter.deleteBtn"
+							data-action="click->image-sorter#delete">
+						</button>
+					</div>
+
+					<div class="mb-3">
+						<h3 class="f5 mb-2" data-target="image-sorter.keptListTitle">–</h3>
+						<ul
+							class="list-style-none p-0 m-0 f6 overflow-y-auto"
+							data-target="image-sorter.keptList"
+							style="max-height: 200px;">
+						</ul>
+					</div>
+					<div class="f6 color-fg-muted" data-target="image-sorter.stats"></div>
 				</div>
-			</div>
-
-			<div class="controls" data-target="image-sorter.controls" style="display: none;">
-				<button type="button" data-target="image-sorter.prevBtn" data-action="click->image-sorter#navigatePrevious"></button>
-				<button type="button" data-target="image-sorter.keepBtn" aria-pressed="false" data-action="click->image-sorter#keep"></button>
-				<button type="button" data-target="image-sorter.deleteBtn" aria-pressed="false" data-action="click->image-sorter#delete"></button>
-				<button type="button" data-target="image-sorter.nextBtn" data-action="click->image-sorter#navigateNext"></button>
-			</div>
-
-			<div class="stats">
-				<span data-target="image-sorter.stats"></span>
 			</div>
 		</div>
 

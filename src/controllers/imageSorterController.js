@@ -9,10 +9,12 @@ export default class ImageSorterController extends Controller {
         'imageName',
         'imagePath',
         'pickButton',
+        'changeFolderBtn',
         'prevBtn',
         'keepBtn',
         'deleteBtn',
         'nextBtn',
+        'copyImageBtn',
         'copyNameBtn',
         'copyPathBtn',
         'resetBtn',
@@ -21,7 +23,8 @@ export default class ImageSorterController extends Controller {
         'keptListTitle',
         'stats',
         'container',
-        'controls',
+        'navbar',
+        'navButtons',
     ]
 
     connect() {
@@ -56,10 +59,12 @@ export default class ImageSorterController extends Controller {
 
     updateLabels() {
         this.pickButtonTarget.textContent = t('pickFolder')
+        this.changeFolderBtnTarget.textContent = t('changeFolder')
         this.prevBtnTarget.textContent = t('previous')
         this.keepBtnTarget.textContent = t('keep')
         this.deleteBtnTarget.textContent = t('delete')
         this.nextBtnTarget.textContent = t('next')
+        this.copyImageBtnTarget.textContent = t('copyImage')
         this.copyNameBtnTarget.textContent = t('copyName')
         this.copyPathBtnTarget.textContent = t('copyPath')
         this.resetBtnTarget.textContent = t('reset')
@@ -70,7 +75,8 @@ export default class ImageSorterController extends Controller {
 
         if (ok) {
             this.containerTarget.style.display = ''
-            this.controlsTarget.style.display = ''
+            this.pickButtonTarget.style.display = 'none'
+            this.navButtonsTarget.style.display = 'flex'
             this.load()
         }
     }
@@ -102,6 +108,7 @@ export default class ImageSorterController extends Controller {
             this.nextBtnTarget.disabled = true
             this.keepBtnTarget.disabled = true
             this.deleteBtnTarget.disabled = true
+            this.copyImageBtnTarget.disabled = true
             this.copyNameBtnTarget.disabled = true
             this.copyPathBtnTarget.disabled = true
             return
@@ -127,6 +134,7 @@ export default class ImageSorterController extends Controller {
         this.nextBtnTarget.disabled = false
         this.keepBtnTarget.disabled = false
         this.deleteBtnTarget.disabled = false
+        this.copyImageBtnTarget.disabled = false
         this.copyNameBtnTarget.disabled = false
         this.copyPathBtnTarget.disabled = false
 
@@ -175,6 +183,18 @@ export default class ImageSorterController extends Controller {
         this.displayCurrent()
     }
 
+    copyImage() {
+        const currentFile = this.files[this.index]
+
+        if (currentFile) {
+            clipboard.write({
+                files: [
+                    currentFile,
+                ],
+            })
+        }
+    }
+
     copyName() {
         clipboard.writeText(this.imageNameTarget.textContent)
     }
@@ -190,6 +210,10 @@ export default class ImageSorterController extends Controller {
 
     updateKeptList() {
         this.keptListTarget.innerHTML = ''
+
+        const count = this.kept.length
+        const key = count <= 1 ? 'keptImage' : 'keptImages'
+        this.keptListTitleTarget.textContent = `${t(key)} (${count})`
 
         this.kept.slice(-20).forEach((file) => {
             const parts = file.split(/[/\\]/)
@@ -225,7 +249,8 @@ export default class ImageSorterController extends Controller {
 
         if (this.files.length > 0 && this.folderPath) {
             this.containerTarget.style.display = ''
-            this.controlsTarget.style.display = ''
+            this.pickButtonTarget.style.display = 'none'
+            this.navButtonsTarget.style.display = 'flex'
             this.displayCurrent()
             this.updateStats()
             this.updateKeptList()
