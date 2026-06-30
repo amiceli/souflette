@@ -1,7 +1,7 @@
 import { Controller } from 'stimulus'
 import { t } from '../i18n.js'
 
-const { ipcRenderer, clipboard } = window.require('electron')
+const { ipcRenderer, clipboard, nativeImage } = window.require('electron')
 
 export default class ImageSorterController extends Controller {
     static targets = [
@@ -18,13 +18,16 @@ export default class ImageSorterController extends Controller {
         'copyNameBtn',
         'copyPathBtn',
         'resetBtn',
-        'keptList',
-        'keptCount',
-        'keptListTitle',
+        'closeBtn',
         'stats',
         'container',
-        'navbar',
         'navButtons',
+        'imageWrap',
+        'controls',
+    ]
+
+    static classes = [
+        'hidden',
     ]
 
     connect() {
@@ -34,8 +37,8 @@ export default class ImageSorterController extends Controller {
         this.folderPath = null
 
         this.updateLabels()
-        this.loadState()
         this.setupKeyboardShortcuts()
+        this.loadState()
     }
 
     setupKeyboardShortcuts() {
@@ -68,30 +71,31 @@ export default class ImageSorterController extends Controller {
         this.copyNameBtnTarget.textContent = t('copyName')
         this.copyPathBtnTarget.textContent = t('copyPath')
         this.resetBtnTarget.textContent = t('reset')
+        this.closeBtnTarget.textContent = t('close')
+    }
+
+    applyState(state) {
+        this.files = state.files || []
+        this.index = state.index || 0
+        this.kept = state.kept || []
+        this.folderPath = state.folderPath || null
+    }
+
+    async loadState() {
+        const state = await ipcRenderer.invoke('get-state')
+
+        this.applyState(state)
+        this.displayCurrent()
     }
 
     async pickFolder() {
         const ok = await ipcRenderer.invoke('choose-folder')
 
         if (ok) {
-            this.containerTarget.style.display = ''
-            this.pickButtonTarget.style.display = 'none'
-            this.navButtonsTarget.style.display = 'flex'
-            this.load()
+            const state = await ipcRenderer.invoke('get-state')
+            this.applyState(state)
+            this.displayCurrent()
         }
-    }
-
-    async load() {
-        const state = await ipcRenderer.invoke('get-state')
-
-        this.files = state.files || []
-        this.index = state.index || 0
-        this.kept = state.kept || []
-        this.folderPath = state.folderPath || null
-
-        this.displayCurrent()
-        this.updateStats()
-        this.updateKeptList()
     }
 
     displayCurrent() {
@@ -99,46 +103,40 @@ export default class ImageSorterController extends Controller {
             this.index = 0
         }
 
-        if (this.index >= this.files.length) {
-            this.imageNameTarget.textContent = t('done')
-            this.imagePathTarget.textContent = t('doneDesc')
-            this.currentImageTarget.src = ''
-            this.currentImageTarget.alt = ''
-            this.prevBtnTarget.disabled = true
-            this.nextBtnTarget.disabled = true
-            this.keepBtnTarget.disabled = true
-            this.deleteBtnTarget.disabled = true
-            this.copyImageBtnTarget.disabled = true
-            this.copyNameBtnTarget.disabled = true
-            this.copyPathBtnTarget.disabled = true
-            return
-        }
-
         const current = this.files[this.index]
 
-        if (!current) {
-            this.imageNameTarget.textContent = t('error')
-            this.imagePathTarget.textContent = t('errorDesc')
+        if (current) {
+            this.currentImageTarget.src = `file://${current}`
+            const parts = current.split(/[/\\]/)
+            const name = parts[parts.length - 1]
 
-            return
+            this.imageNameTarget.textContent = name
+            this.imagePathTarget.textContent = current
+            this.prevBtnTarget.disabled = this.index === 0
+            this.nextBtnTarget.disabled = this.index >= this.files.length - 1
+        } else {
+            this.currentImageTarget.src = ''
+            this.imageNameTarget.textContent = this.folderPath ? t('done') : ''
+            this.imagePathTarget.textContent = this.folderPath
+                ? t('doneDesc')
+                : ''
         }
 
-        this.currentImageTarget.src = `file://${current}`
-        const parts = current.split(/[/\\]/)
-        const name = parts[parts.length - 1]
-
-        this.imageNameTarget.textContent = name
-        this.imagePathTarget.textContent = current
-
-        this.prevBtnTarget.disabled = this.index === 0
-        this.nextBtnTarget.disabled = false
-        this.keepBtnTarget.disabled = false
-        this.deleteBtnTarget.disabled = false
-        this.copyImageBtnTarget.disabled = false
-        this.copyNameBtnTarget.disabled = false
-        this.copyPathBtnTarget.disabled = false
-
+        this.updateStats()
+        this.render()
         this.saveState()
+    }
+
+    render() {
+        const hasFolder = Boolean(this.folderPath)
+        const hasImage = hasFolder && Boolean(this.files[this.index])
+
+        this.pickButtonTarget.classList.toggle(this.hiddenClass, hasFolder)
+        this.navButtonsTarget.classList.toggle(this.hiddenClass, !hasFolder)
+        this.closeBtnTarget.classList.toggle(this.hiddenClass, !hasFolder)
+        this.containerTarget.classList.toggle(this.hiddenClass, !hasFolder)
+        this.imageWrapTarget.classList.toggle(this.hiddenClass, !hasImage)
+        this.controlsTarget.classList.toggle(this.hiddenClass, !hasImage)
     }
 
     navigatePrevious() {
@@ -158,23 +156,27 @@ export default class ImageSorterController extends Controller {
     keep() {
         const current = this.files[this.index]
 
-        if (current && !this.kept.includes(current)) {
-            this.kept.push(current)
-            this.updateKeptList()
-            this.saveState()
+        if (!current) {
+            return
         }
 
-        this.navigateNext()
+        if (!this.kept.includes(current)) {
+            this.kept.push(current)
+        }
+
+        this.index++
+        this.displayCurrent()
     }
 
     delete() {
         const current = this.files[this.index]
 
-        if (current) {
-            ipcRenderer.send('delete-file', current)
-            this.files.splice(this.index, 1)
-            this.saveState()
+        if (!current) {
+            return
         }
+
+        ipcRenderer.send('delete-file', current)
+        this.files.splice(this.index, 1)
 
         if (this.index >= this.files.length) {
             this.index = Math.max(0, this.files.length - 1)
@@ -187,11 +189,8 @@ export default class ImageSorterController extends Controller {
         const currentFile = this.files[this.index]
 
         if (currentFile) {
-            clipboard.write({
-                files: [
-                    currentFile,
-                ],
-            })
+            const image = nativeImage.createFromPath(currentFile)
+            clipboard.writeImage(image)
         }
     }
 
@@ -208,26 +207,27 @@ export default class ImageSorterController extends Controller {
         this.displayCurrent()
     }
 
-    updateKeptList() {
-        this.keptListTarget.innerHTML = ''
+    close() {
+        this.files = []
+        this.index = 0
+        this.kept = []
+        this.folderPath = null
 
-        const count = this.kept.length
-        const key = count <= 1 ? 'keptImage' : 'keptImages'
-        this.keptListTitleTarget.textContent = `${t(key)} (${count})`
-
-        this.kept.slice(-20).forEach((file) => {
-            const parts = file.split(/[/\\]/)
-            const name = parts[parts.length - 1]
-            const li = document.createElement('li')
-            li.textContent = name
-            li.title = file
-            this.keptListTarget.appendChild(li)
-        })
+        this.saveState()
+        this.displayCurrent()
     }
 
     updateStats() {
-        const remaining = this.files.length - this.index
-        this.statsTarget.textContent = `${this.index + 1} / ${this.files.length} (${remaining} ${t('remaining')})`
+        if (!this.folderPath || this.files.length === 0) {
+            this.statsTarget.textContent = ''
+
+            return
+        }
+
+        const position = Math.min(this.index + 1, this.files.length)
+        const remaining = Math.max(0, this.files.length - this.index)
+
+        this.statsTarget.textContent = `${position} / ${this.files.length} (${remaining} ${t('remaining')})`
     }
 
     saveState() {
@@ -237,23 +237,5 @@ export default class ImageSorterController extends Controller {
             kept: this.kept,
             folderPath: this.folderPath,
         })
-        this.updateStats()
-    }
-
-    async loadState() {
-        const state = await ipcRenderer.invoke('get-state')
-        this.files = state.files || []
-        this.index = state.index || 0
-        this.kept = state.kept || []
-        this.folderPath = state.folderPath || null
-
-        if (this.files.length > 0 && this.folderPath) {
-            this.containerTarget.style.display = ''
-            this.pickButtonTarget.style.display = 'none'
-            this.navButtonsTarget.style.display = 'flex'
-            this.displayCurrent()
-            this.updateStats()
-            this.updateKeptList()
-        }
     }
 }

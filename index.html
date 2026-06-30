@@ -5,9 +5,19 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>Tri images</title>
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@primer/css@21.0.0/dist/primer.css">
+		<style>
+			.image-display {
+				max-width: 100%;
+				max-height: 100%;
+				object-fit: contain;
+			}
+		</style>
 	</head>
 	<body class="height-full">
-		<div class="height-full d-flex flex-column" data-controller="image-sorter">
+		<div
+			class="height-full d-flex flex-column"
+			data-controller="image-sorter"
+			data-image-sorter-hidden-class="d-none">
 			<header class="Header d-flex flex-items-center p-3">
 				<button
 					type="button"
@@ -15,24 +25,30 @@
 					data-target="image-sorter.pickButton"
 					data-action="click->image-sorter#pickFolder">
 				</button>
-				<div class="d-flex flex-items-center" data-target="image-sorter.navButtons" style="display: none;">
+				<div class="d-flex flex-items-center d-none" data-target="image-sorter.navButtons">
 					<button
 						type="button"
-						class="btn mr-2"
+						class="btn btn-primary mr-2"
 						data-target="image-sorter.changeFolderBtn"
 						data-action="click->image-sorter#pickFolder">
 					</button>
 					<button
 						type="button"
-						class="btn btn-danger"
+						class="btn btn-danger btn-outline"
 						data-target="image-sorter.resetBtn"
 						data-action="click->image-sorter#reset">
 					</button>
 				</div>
+				<button
+					type="button"
+					class="btn btn-danger ml-auto d-none"
+					data-target="image-sorter.closeBtn"
+					data-action="click->image-sorter#close">
+				</button>
 			</header>
 
-			<div class="d-flex flex-1 overflow-hidden" data-target="image-sorter.container" style="display: none;">
-				<div class="d-flex flex-column flex-1 p-3 overflow-hidden">
+			<div class="d-flex flex-1 overflow-hidden d-none" data-target="image-sorter.container">
+				<div class="d-flex flex-column flex-1 p-3 overflow-hidden d-none" data-target="image-sorter.imageWrap">
 					<div class="d-flex flex-1 flex-justify-center flex-items-center overflow-hidden">
 						<img class="image-display" data-target="image-sorter.currentImage" alt="" />
 					</div>
@@ -60,51 +76,45 @@
 						<p class="f6 color-fg-muted mb-0" data-target="image-sorter.imagePath"></p>
 					</div>
 
-					<div class="d-flex flex-column mb-3">
-						<button
-							type="button"
-							class="btn btn-primary mb-2"
-							data-target="image-sorter.copyImageBtn"
-							data-action="click->image-sorter#copyImage">
-						</button>
-						<button
-							type="button"
-							class="btn btn-primary mb-2"
-							data-target="image-sorter.copyNameBtn"
-							data-action="click->image-sorter#copyName">
-						</button>
-						<button
-							type="button"
-							class="btn btn-primary"
-							data-target="image-sorter.copyPathBtn"
-							data-action="click->image-sorter#copyPath">
-						</button>
+					<div class="d-none" data-target="image-sorter.controls">
+						<div class="d-flex flex-column mb-3">
+							<button
+								type="button"
+								class="btn btn-primary mb-2"
+								data-target="image-sorter.copyImageBtn"
+								data-action="click->image-sorter#copyImage">
+							</button>
+							<button
+								type="button"
+								class="btn btn-primary mb-2"
+								data-target="image-sorter.copyNameBtn"
+								data-action="click->image-sorter#copyName">
+							</button>
+							<button
+								type="button"
+								class="btn btn-primary"
+								data-target="image-sorter.copyPathBtn"
+								data-action="click->image-sorter#copyPath">
+							</button>
+						</div>
+
+						<div class="d-flex mb-3">
+							<button
+								type="button"
+								class="btn btn-primary btn-large flex-1 mr-2"
+								data-target="image-sorter.keepBtn"
+								data-action="click->image-sorter#keep">
+							</button>
+							<button
+								type="button"
+								class="btn btn-danger btn-large flex-1"
+								data-target="image-sorter.deleteBtn"
+								data-action="click->image-sorter#delete">
+							</button>
+						</div>
 					</div>
 
-					<div class="d-flex mb-3">
-						<button
-							type="button"
-							class="btn btn-primary btn-large flex-1 mr-2"
-							data-target="image-sorter.keepBtn"
-							data-action="click->image-sorter#keep">
-						</button>
-						<button
-							type="button"
-							class="btn btn-danger btn-large flex-1"
-							data-target="image-sorter.deleteBtn"
-							data-action="click->image-sorter#delete">
-						</button>
-					</div>
-
-					<div class="mb-3">
-						<h3 class="f5 mb-2" data-target="image-sorter.keptListTitle">–</h3>
-						<ul
-							class="list-style-none p-0 m-0 f6 overflow-y-auto"
-							data-target="image-sorter.keptList"
-							style="max-height: 200px;">
-						</ul>
-					</div>
-					<div class="f6 color-fg-muted" data-target="image-sorter.stats"></div>
+					<div class="h3 color-fg-muted" data-target="image-sorter.stats"></div>
 				</div>
 			</div>
 		</div>
