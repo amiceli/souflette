@@ -17,7 +17,9 @@ function getImages(dir) {
 
         if (entry.isDirectory()) {
             images.push(...getImages(fullPath))
-        } else if (/\.(jpg|jpeg|png|webp|gif)$/i.test(entry.name)) {
+        } else if (
+            /\.(jpg|jpeg|png|webp|gif|mp4|webm|mov|mkv|avi)$/i.test(entry.name)
+        ) {
             images.push(fullPath)
         }
     }
@@ -25,29 +27,19 @@ function getImages(dir) {
     return images.sort()
 }
 
-function loadState() {
-    if (fs.existsSync(stateFile)) {
-        const data = fs.readFileSync(stateFile, 'utf-8')
-        try {
-            return JSON.parse(data)
-        } catch {
-            return {
-                files: [],
-                index: 0,
-                kept: [],
-                folderPath: null,
-            }
-        }
+function readState() {
+    if (!fs.existsSync(stateFile)) {
+        return null
     }
-    return {
-        files: [],
-        index: 0,
-        kept: [],
-        folderPath: null,
+
+    try {
+        return JSON.parse(fs.readFileSync(stateFile, 'utf-8'))
+    } catch {
+        return null
     }
 }
 
-function saveState(state) {
+function writeState(state) {
     fs.mkdirSync(path.dirname(stateFile), {
         recursive: true,
     })
@@ -67,7 +59,7 @@ app.whenReady().then(() => {
     win.loadFile('index.html')
 })
 
-ipcMain.handle('choose-folder', async () => {
+ipcMain.handle('pick-directory', async () => {
     const res = await dialog.showOpenDialog(win, {
         properties: [
             'openDirectory',
@@ -78,27 +70,19 @@ ipcMain.handle('choose-folder', async () => {
         return false
     }
 
-    const folderPath = res.filePaths[0]
-    const files = getImages(folderPath)
-    const currentState = loadState()
+    return res.filePaths[0]
+})
 
-    const state = {
-        files,
-        index: currentState.folderPath === folderPath ? currentState.index : 0,
-        kept: currentState.folderPath === folderPath ? currentState.kept : [],
-        folderPath,
-    }
-
-    saveState(state)
-    return true
+ipcMain.handle('scan-folder', (_e, options) => {
+    return getImages(options.sourcePath)
 })
 
 ipcMain.handle('get-state', () => {
-    return loadState()
+    return readState()
 })
 
 ipcMain.on('save-state', (_e, state) => {
-    saveState(state)
+    writeState(state)
 })
 
 ipcMain.on('delete-file', (_e, filePath) => {
@@ -107,4 +91,17 @@ ipcMain.on('delete-file', (_e, filePath) => {
     } catch {
         // File might already be deleted
     }
+})
+
+ipcMain.handle('move-file', (_e, options) => {
+    const target = path.join(options.destPath, path.basename(options.filePath))
+
+    try {
+        fs.renameSync(options.filePath, target)
+    } catch {
+        fs.copyFileSync(options.filePath, target)
+        fs.unlinkSync(options.filePath)
+    }
+
+    return target
 })
