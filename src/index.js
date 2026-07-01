@@ -1,6 +1,7 @@
-import { Application } from 'stimulus'
-import ImageSorterController from './controllers/imageSorterController.js'
+import { createApp } from 'vue'
+import App from '@/components/App.js'
+import { init } from '@/stores/sorter.js'
 
-const Stimulus = Application.start()
-
-Stimulus.register('image-sorter', ImageSorterController)
+init().then(() => {
+    createApp(App).mount('#app')
+})
